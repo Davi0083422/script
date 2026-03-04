@@ -10,6 +10,7 @@ local player = Players.LocalPlayer
 
 -- SEU SITE AQUI ↓↓↓
 local API_URL = "https://gerar-key.vercel.app"
+local OWNER_ID = 9463794477 -- Seu ID de Dono
 
 -- VARIÁVEIS
 local currentKey = ""
@@ -195,7 +196,7 @@ Botao.MouseButton1Click:Connect(function()
     Botao.Text = "VALIDANDO..."
     Botao.Active = false
     
-    -- Chama sua API
+    -- Chama sua API (Ajustado sem o /api)
     local sucesso, resposta = pcall(function()
         return HttpService:RequestAsync({
             Url = API_URL.."/validate",
@@ -218,26 +219,16 @@ Botao.MouseButton1Click:Connect(function()
     local dados = HttpService:JSONDecode(resposta.Body)
     
     if dados.valid then
-        -- SUCESSO!
         currentKey = key
         sessionStart = tick()
-        
         Status.TextColor3 = Color3.fromRGB(16, 185, 129)
         Status.Text = "✅ Key validada!"
-        
         wait(0.5)
-        
-        -- Troca telas
         LoginFrame.Visible = false
         MenuFrame.Visible = true
         KeyDisplay.Text = "Key: "..key
-        
-        -- Inicia contador de 3 horas
         iniciarTimer(dados.remaining_seconds or 10800)
-        
-        -- Inicia funções
         iniciarSistema()
-        
     else
         Status.TextColor3 = Color3.fromRGB(255, 50, 50)
         Status.Text = "❌ "..(dados.error or "Key inválida")
@@ -253,29 +244,25 @@ end)
 function iniciarTimer(segundosTotais)
     spawn(function()
         local tempo = segundosTotais
-        
         while tempo > 0 and MenuFrame.Visible do
             local h = math.floor(tempo / 3600)
             local m = math.floor((tempo % 3600) / 60)
             local s = tempo % 60
-            
             TimerLabel.Text = string.format("⏱️ %02d:%02d:%02d", h, m, s)
-            
-            -- Aviso quando faltar 5 minutos
-            if tempo < 300 then
-                TimerLabel.TextColor3 = Color3.fromRGB(255, 200, 50)
-            end
-            
+            if tempo < 300 then TimerLabel.TextColor3 = Color3.fromRGB(255, 200, 50) end
             wait(1)
             tempo = tempo - 1
         end
         
-        -- EXPIROU!
-        TimerLabel.Text = "⏱️ EXPIRADO"
-        TimerLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
-        
-        wait(2)
-        player:Kick("\n🔒 DVZ SCRIPT\n⏰ Sua key expirou!\n🌐 Gere nova em: gerar-key.vercel.app\n\nBy Davz")
+        -- Só dá Kick se não for o dono
+        if player.UserId ~= OWNER_ID then
+            TimerLabel.Text = "⏱️ EXPIRADO"
+            TimerLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+            wait(2)
+            player:Kick("\n🔒 DVZ SCRIPT\n⏰ Sua key expirou!\n🌐 Gere nova em: gerar-key.vercel.app\n\nBy Davz")
+        else
+            TimerLabel.Text = "⏱️ INFINITO"
+        end
     end)
 end
 
@@ -288,17 +275,13 @@ function iniciarSistema()
     local espBoxes = {}
     
     RunService.RenderStepped:Connect(function()
-        -- Limpa ESP antigo
         for _, box in pairs(espBoxes) do box:Destroy() end
         espBoxes = {}
-        
-        -- ESP
         if getESP() then
             for _, alvo in pairs(Players:GetPlayers()) do
                 if alvo ~= player and alvo.Character and alvo.Character:FindFirstChild("Head") then
                     local head = alvo.Character.Head
                     local pos, visivel = camera:WorldToViewportPoint(head.Position)
-                    
                     if visivel then
                         local box = Instance.new("TextLabel", ScreenGui)
                         box.Size = UDim2.new(0, 100, 0, 20)
@@ -313,31 +296,34 @@ function iniciarSistema()
                 end
             end
         end
-        
-        -- Aimbot / Aim Lock
         if getAimbot() or getAimLock() then
             local maisProximo = nil
             local menorDist = math.huge
-            
             for _, alvo in pairs(Players:GetPlayers()) do
                 if alvo ~= player and alvo.Character and alvo.Character:FindFirstChild("Head") then
                     local head = alvo.Character.Head
                     local pos = camera:WorldToViewportPoint(head.Position)
                     local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
-                    
                     if dist < menorDist and dist < 250 then
                         menorDist = dist
                         maisProximo = head
                     end
                 end
             end
-            
-            if maisProximo then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, maisProximo.Position)
-            end
+            if maisProximo then camera.CFrame = CFrame.new(camera.CFrame.Position, maisProximo.Position) end
         end
     end)
 end
 
-print("✅ DVZ Script carregado | By Davz | gerar-key.vercel.app")
-
+-- LÓGICA DE BYPASS DO DONO (9463794477)
+if player.UserId == OWNER_ID then
+    task.wait(0.1)
+    LoginFrame.Visible = false
+    MenuFrame.Visible = true
+    KeyDisplay.Text = "ACESSO: DONO (PERMANENTE)"
+    TimerLabel.Text = "⏱️ INFINITO"
+    TimerLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+    iniciarSistema()
+else
+    print("✅ DVZ Script carregado | By Davz | gerar-key.vercel.app")
+end
