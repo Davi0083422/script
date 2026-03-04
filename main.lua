@@ -9,7 +9,7 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 -- SEU SITE AQUI ↓↓↓
-local API_URL = "https://gerar-key.vercel.app/api"
+local API_URL = "https://gerar-key.vercel.app"
 
 -- VARIÁVEIS
 local currentKey = ""
@@ -340,3 +340,4 @@ function iniciarSistema()
 end
 
 print("✅ DVZ Script carregado | By Davz | gerar-key.vercel.app")
+
