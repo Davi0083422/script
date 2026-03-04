@@ -1,81 +1,342 @@
--- DVZ SCRIPT | FIX FINAL
-local CoreGui = game:GetService("CoreGui")
-if CoreGui:FindFirstChild("DvzScript_UI") then CoreGui:FindFirstChild("DvzScript_UI"):Destroy() end
+--╔══════════════════════════════════════════════════════════════╗
+--║                    DVZ SCRIPT v2026                          ║
+--║              By Davz | Official Secure                       ║
+--╚══════════════════════════════════════════════════════════════╝
 
-local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "DvzScript_UI"
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 380, 0, 280)
-MainFrame.Position = UDim2.new(0.5, -190, 0.5, -140)
-MainFrame.BackgroundColor3 = Color3.fromRGB(12, 13, 17)
-MainFrame.Active = true
-MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+-- SEU SITE AQUI ↓↓↓
+local API_URL = "https://gerar-key.vercel.app/api"
 
--- Barra de Título
-local TitleBar = Instance.new("Frame", MainFrame)
-TitleBar.Size = UDim2.new(1, 0, 0, 45)
-TitleBar.BackgroundColor3 = Color3.fromRGB(20, 21, 26)
-Instance.new("UICorner", TitleBar)
+-- VARIÁVEIS
+local currentKey = ""
+local sessionStart = 0
+local menuAberto = false
 
-local TitleText = Instance.new("TextLabel", TitleBar)
-TitleText.Size = UDim2.new(1, 0, 1, 0)
-TitleText.Text = "DVZ SCRIPT | LOGIN"
-TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleText.Font = Enum.Font.GothamBold
-TitleText.BackgroundTransparency = 1
+--╔══════════════════════════════════════════════════════════════╗
+--║                    TELA DE LOGIN                             ║
+--╚══════════════════════════════════════════════════════════════╝
 
--- Elementos (TextBox e Botões)
-local KeyInput = Instance.new("TextBox", MainFrame)
-KeyInput.Size = UDim2.new(0, 330, 0, 45)
-KeyInput.Position = UDim2.new(0.5, -165, 0, 65)
-KeyInput.PlaceholderText = "Cole sua Key aqui..."
-KeyInput.BackgroundColor3 = Color3.fromRGB(25, 26, 32)
-KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", KeyInput)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DVZ_LOGIN"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
-local LoginBtn = Instance.new("TextButton", MainFrame)
-LoginBtn.Size = UDim2.new(0, 330, 0, 45)
-LoginBtn.Position = UDim2.new(0.5, -165, 0, 120)
-LoginBtn.Text = "VALIDAR ACESSO"
-LoginBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
-LoginBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoginBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", LoginBtn)
+local LoginFrame = Instance.new("Frame")
+LoginFrame.Size = UDim2.new(0, 350, 0, 250)
+LoginFrame.Position = UDim2.new(0.5, -175, 0.5, -125)
+LoginFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+LoginFrame.BorderSizePixel = 0
+LoginFrame.Parent = ScreenGui
 
-local GetKeyBtn = Instance.new("TextButton", MainFrame)
-GetKeyBtn.Size = UDim2.new(0, 330, 0, 40)
-GetKeyBtn.Position = UDim2.new(0.5, -165, 0, 175)
-GetKeyBtn.Text = "OBTER KEY (3 HORAS)"
-GetKeyBtn.BackgroundColor3 = Color3.fromRGB(35, 36, 42)
-GetKeyBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
-Instance.new("UICorner", GetKeyBtn)
+Instance.new("UICorner", LoginFrame).CornerRadius = UDim.new(0, 12)
 
--- Lógica Simples e Funcional
-GetKeyBtn.MouseButton1Click:Connect(function()
-    setclipboard("https://gerar-key.vercel.app")
-    GetKeyBtn.Text = "LINK COPIADO!"
-    task.wait(2)
-    GetKeyBtn.Text = "OBTER KEY (3 HORAS)"
-end)
+-- Título
+local Titulo = Instance.new("TextLabel", LoginFrame)
+Titulo.Size = UDim2.new(1, 0, 0, 50)
+Titulo.Position = UDim2.new(0, 0, 0, 15)
+Titulo.BackgroundTransparency = 1
+Titulo.Text = "🔒 DVZ SCRIPT"
+Titulo.TextColor3 = Color3.fromRGB(16, 185, 129)
+Titulo.TextSize = 28
+Titulo.Font = Enum.Font.GothamBold
 
-LoginBtn.MouseButton1Click:Connect(function()
-    if string.sub(KeyInput.Text, 1, 4) == "DVZ-" and string.len(KeyInput.Text) >= 12 then [cite: 2026-03-02]
-        LoginBtn.Text = "LIBERADO!"
-        task.wait(1)
-        MainFrame:Destroy()
-        -- INSIRA O HUB DE FUNÇÕES AQUI
+-- By Davz
+local Sub = Instance.new("TextLabel", LoginFrame)
+Sub.Size = UDim2.new(1, 0, 0, 20)
+Sub.Position = UDim2.new(0, 0, 0, 60)
+Sub.BackgroundTransparency = 1
+Sub.Text = "By Davz | Official Secure"
+Sub.TextColor3 = Color3.fromRGB(150, 150, 150)
+Sub.TextSize = 12
+Sub.Font = Enum.Font.Gotham
+
+-- Input Key
+local InputBox = Instance.new("TextBox", LoginFrame)
+InputBox.Size = UDim2.new(0.8, 0, 0, 45)
+InputBox.Position = UDim2.new(0.1, 0, 0, 100)
+InputBox.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+InputBox.PlaceholderText = "Digite sua Key (DVZ-XXXX)"
+InputBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+InputBox.TextSize = 16
+InputBox.Font = Enum.Font.Gotham
+Instance.new("UICorner", InputBox).CornerRadius = UDim.new(0, 8)
+
+-- Botão Validar
+local Botao = Instance.new("TextButton", LoginFrame)
+Botao.Size = UDim2.new(0.8, 0, 0, 45)
+Botao.Position = UDim2.new(0.1, 0, 0, 160)
+Botao.BackgroundColor3 = Color3.fromRGB(16, 185, 129)
+Botao.Text = "VALIDAR KEY"
+Botao.TextColor3 = Color3.fromRGB(0, 0, 0)
+Botao.TextSize = 18
+Botao.Font = Enum.Font.GothamBold
+Instance.new("UICorner", Botao).CornerRadius = UDim.new(0, 8)
+
+-- Status
+local Status = Instance.new("TextLabel", LoginFrame)
+Status.Size = UDim2.new(1, 0, 0, 20)
+Status.Position = UDim2.new(0, 0, 0, 215)
+Status.BackgroundTransparency = 1
+Status.Text = ""
+Status.TextColor3 = Color3.fromRGB(255, 50, 50)
+Status.TextSize = 12
+Status.Font = Enum.Font.Gotham
+
+--╔══════════════════════════════════════════════════════════════╗
+--║                    MENU PRINCIPAL                            ║
+--╚══════════════════════════════════════════════════════════════╝
+
+local MenuFrame = Instance.new("Frame")
+MenuFrame.Size = UDim2.new(0, 280, 0, 350)
+MenuFrame.Position = UDim2.new(0.5, -140, 0.5, -175)
+MenuFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+MenuFrame.Visible = false
+MenuFrame.Parent = ScreenGui
+
+Instance.new("UICorner", MenuFrame).CornerRadius = UDim.new(0, 16)
+
+-- Header verde
+local Header = Instance.new("Frame", MenuFrame)
+Header.Size = UDim2.new(1, 0, 0, 70)
+Header.BackgroundColor3 = Color3.fromRGB(16, 185, 129)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 16)
+
+local HeaderTitulo = Instance.new("TextLabel", Header)
+HeaderTitulo.Size = UDim2.new(1, 0, 0, 40)
+HeaderTitulo.Position = UDim2.new(0, 0, 0, 10)
+HeaderTitulo.BackgroundTransparency = 1
+HeaderTitulo.Text = "DVZ HUB"
+HeaderTitulo.TextColor3 = Color3.fromRGB(0, 0, 0)
+HeaderTitulo.TextSize = 24
+HeaderTitulo.Font = Enum.Font.GothamBold
+
+local Credito = Instance.new("TextLabel", Header)
+Credito.Size = UDim2.new(1, 0, 0, 20)
+Credito.Position = UDim2.new(0, 0, 0, 45)
+Credito.BackgroundTransparency = 1
+Credito.Text = "By Davz | Official Secure"
+Credito.TextColor3 = Color3.fromRGB(0, 0, 0)
+Credito.TextSize = 11
+Credito.Font = Enum.Font.Gotham
+
+-- Timer
+local TimerLabel = Instance.new("TextLabel", MenuFrame)
+TimerLabel.Size = UDim2.new(1, 0, 0, 35)
+TimerLabel.Position = UDim2.new(0, 0, 0, 80)
+TimerLabel.BackgroundTransparency = 1
+TimerLabel.Text = "⏱️ 03:00:00"
+TimerLabel.TextColor3 = Color3.fromRGB(16, 185, 129)
+TimerLabel.TextSize = 24
+TimerLabel.Font = Enum.Font.GothamBold
+
+-- Container botões
+local Container = Instance.new("Frame", MenuFrame)
+Container.Size = UDim2.new(1, -40, 0, 180)
+Container.Position = UDim2.new(0, 20, 0, 125)
+Container.BackgroundTransparency = 1
+
+-- Função criar botão
+local function criarBotao(nome, icone, posY)
+    local btn = Instance.new("TextButton", Container)
+    btn.Size = UDim2.new(1, 0, 0, 50)
+    btn.Position = UDim2.new(0, 0, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+    btn.Text = icone.." "..nome
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 18
+    btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    
+    local ativo = false
+    btn.MouseButton1Click:Connect(function()
+        ativo = not ativo
+        btn.BackgroundColor3 = ativo and Color3.fromRGB(16, 185, 129) or Color3.fromRGB(26, 26, 26)
+        btn.TextColor3 = ativo and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(255, 255, 255)
+        return ativo
+    end)
+    
+    return function() return ativo end
+end
+
+-- Criar 3 botões
+local getAimbot = criarBotao("AIMBOT", "🎯", 0)
+local getESP = criarBotao("ESP", "👁️", 60)
+local getAimLock = criarBotao("AIM LOCK", "🔒", 120)
+
+-- Key display
+local KeyDisplay = Instance.new("TextLabel", MenuFrame)
+KeyDisplay.Size = UDim2.new(1, 0, 0, 20)
+KeyDisplay.Position = UDim2.new(0, 0, 1, -40)
+KeyDisplay.BackgroundTransparency = 1
+KeyDisplay.Text = "Key: DVZ-XXXX"
+KeyDisplay.TextColor3 = Color3.fromRGB(100, 100, 100)
+KeyDisplay.TextSize = 12
+KeyDisplay.Font = Enum.Font.Gotham
+
+--╔══════════════════════════════════════════════════════════════╗
+--║                    SISTEMA DE VALIDAÇÃO                      ║
+--╚══════════════════════════════════════════════════════════════╝
+
+Botao.MouseButton1Click:Connect(function()
+    local key = InputBox.Text:upper():gsub("%s+", "")
+    
+    if not key:match("^DVZ%-") then
+        Status.Text = "❌ Key deve começar com DVZ-"
+        return
+    end
+    
+    Status.TextColor3 = Color3.fromRGB(255, 200, 50)
+    Status.Text = "⏳ Validando..."
+    Botao.Text = "VALIDANDO..."
+    Botao.Active = false
+    
+    -- Chama sua API
+    local sucesso, resposta = pcall(function()
+        return HttpService:RequestAsync({
+            Url = API_URL.."/validate",
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode({
+                key = key,
+                roblox_user_id = player.UserId
+            })
+        })
+    end)
+    
+    if not sucesso or not resposta then
+        Status.Text = "❌ Erro de conexão"
+        Botao.Text = "VALIDAR KEY"
+        Botao.Active = true
+        return
+    end
+    
+    local dados = HttpService:JSONDecode(resposta.Body)
+    
+    if dados.valid then
+        -- SUCESSO!
+        currentKey = key
+        sessionStart = tick()
+        
+        Status.TextColor3 = Color3.fromRGB(16, 185, 129)
+        Status.Text = "✅ Key validada!"
+        
+        wait(0.5)
+        
+        -- Troca telas
+        LoginFrame.Visible = false
+        MenuFrame.Visible = true
+        KeyDisplay.Text = "Key: "..key
+        
+        -- Inicia contador de 3 horas
+        iniciarTimer(dados.remaining_seconds or 10800)
+        
+        -- Inicia funções
+        iniciarSistema()
+        
     else
-        LoginBtn.Text = "KEY INVÁLIDA"
-        task.wait(1)
-        LoginBtn.Text = "VALIDAR ACESSO"
+        Status.TextColor3 = Color3.fromRGB(255, 50, 50)
+        Status.Text = "❌ "..(dados.error or "Key inválida")
+        Botao.Text = "VALIDAR KEY"
+        Botao.Active = true
     end
 end)
 
-local Credits = Instance.new("TextLabel", MainFrame)
-Credits.Size = UDim2.new(1, 0, 0, 20)
-Credits.Position = UDim2.new(0, 0, 1, -25)
-Credits.Text = "By Davz | Pix: 24999582173" [cite: 2026-03-01, 2026-03-02]
-Credits.TextColor3 = Color3.fromRGB(80, 80, 80)
-Credits.BackgroundTransparency = 1
+--╔══════════════════════════════════════════════════════════════╗
+--║                    TIMER 3 HORAS                             ║
+--╚══════════════════════════════════════════════════════════════╝
+
+function iniciarTimer(segundosTotais)
+    spawn(function()
+        local tempo = segundosTotais
+        
+        while tempo > 0 and MenuFrame.Visible do
+            local h = math.floor(tempo / 3600)
+            local m = math.floor((tempo % 3600) / 60)
+            local s = tempo % 60
+            
+            TimerLabel.Text = string.format("⏱️ %02d:%02d:%02d", h, m, s)
+            
+            -- Aviso quando faltar 5 minutos
+            if tempo < 300 then
+                TimerLabel.TextColor3 = Color3.fromRGB(255, 200, 50)
+            end
+            
+            wait(1)
+            tempo = tempo - 1
+        end
+        
+        -- EXPIROU!
+        TimerLabel.Text = "⏱️ EXPIRADO"
+        TimerLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+        
+        wait(2)
+        player:Kick("\n🔒 DVZ SCRIPT\n⏰ Sua key expirou!\n🌐 Gere nova em: gerar-key.vercel.app\n\nBy Davz")
+    end)
+end
+
+--╔══════════════════════════════════════════════════════════════╗
+--║                    FUNÇÕES (AIMBOT/ESP)                      ║
+--╚══════════════════════════════════════════════════════════════╝
+
+function iniciarSistema()
+    local camera = workspace.CurrentCamera
+    local espBoxes = {}
+    
+    RunService.RenderStepped:Connect(function()
+        -- Limpa ESP antigo
+        for _, box in pairs(espBoxes) do box:Destroy() end
+        espBoxes = {}
+        
+        -- ESP
+        if getESP() then
+            for _, alvo in pairs(Players:GetPlayers()) do
+                if alvo ~= player and alvo.Character and alvo.Character:FindFirstChild("Head") then
+                    local head = alvo.Character.Head
+                    local pos, visivel = camera:WorldToViewportPoint(head.Position)
+                    
+                    if visivel then
+                        local box = Instance.new("TextLabel", ScreenGui)
+                        box.Size = UDim2.new(0, 100, 0, 20)
+                        box.Position = UDim2.new(0, pos.X - 50, 0, pos.Y - 10)
+                        box.BackgroundTransparency = 1
+                        box.Text = alvo.Name
+                        box.TextColor3 = Color3.fromRGB(255, 0, 0)
+                        box.TextSize = 14
+                        box.Font = Enum.Font.GothamBold
+                        table.insert(espBoxes, box)
+                    end
+                end
+            end
+        end
+        
+        -- Aimbot / Aim Lock
+        if getAimbot() or getAimLock() then
+            local maisProximo = nil
+            local menorDist = math.huge
+            
+            for _, alvo in pairs(Players:GetPlayers()) do
+                if alvo ~= player and alvo.Character and alvo.Character:FindFirstChild("Head") then
+                    local head = alvo.Character.Head
+                    local pos = camera:WorldToViewportPoint(head.Position)
+                    local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
+                    
+                    if dist < menorDist and dist < 250 then
+                        menorDist = dist
+                        maisProximo = head
+                    end
+                end
+            end
+            
+            if maisProximo then
+                camera.CFrame = CFrame.new(camera.CFrame.Position, maisProximo.Position)
+            end
+        end
+    end)
+end
+
+print("✅ DVZ Script carregado | By Davz | gerar-key.vercel.app")
